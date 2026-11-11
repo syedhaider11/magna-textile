@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magna Processing — Textile Printing &amp; Fabric Processing since 1965</title>
+<meta name="description" content="Magna Processing Industries (Pvt) Ltd. Vertically integrated home textile manufacturer in Faisalabad since 1965: sizing, warping, weaving, printing, processing and stitching.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230d0d0e'/><text x='16' y='23' font-size='20' font-family='Impact' fill='%23e8e2d6' text-anchor='middle'>M</text></svg>">
+<style>
+/* ============ tokens ============ */
+:root{
+  /* night is the default; every surface colour is a token so day mode is one override */
+  --bg:#0d0d0e;
+  --bg-2:#141416;
+  --bg-3:#1c1c1f;
+  --fg:#f1ece3;
+  --fg-dim:#c2bbad;
+  --clay:#c2593a;
+  --gold:#c8a05a;
+  --line:rgba(241,236,227,.16);
+  --glass:rgba(13,13,14,.72);
+  --mark:rgba(241,236,227,.34);
+  --sheen:rgba(241,236,227,.16);
+  --glow:rgba(241,236,227,.07);
+  --thread:rgba(241,236,227,.075);
+  /* wash over the hero photograph — dark for cream type, light for the green */
+  --hero-scrim:linear-gradient(180deg,rgba(13,13,14,.88) 0%,rgba(13,13,14,.58) 42%,rgba(13,13,14,.92) 100%);
+  --on-img:#f1ece3;
+  --on-img-dim:rgba(241,236,227,.72);
+  --display:'Bahnschrift SemiBold','Bahnschrift','Impact','Haettenschweiler',sans-serif;
+  --body:'Segoe UI Variable','Segoe UI',system-ui,-apple-system,sans-serif;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-stretch:cubic-bezier(.2,.9,.2,1.2);
+  --pad:clamp(20px,5vw,84px);
+  /* one radius for the picture frames and buttons, one for the small controls */
+  --radius:16px;
+  --radius-sm:10px;
+}
+html[data-theme=light]{
+  --bg:#f3eee3;
+  --bg-2:#e7e0d2;
+  --bg-3:#dcd3c2;
+  /* every dark ink in day mode is the same deep green, with the hairlines and
+     shadows tinted from it so nothing stays neutral-black */
+  --fg:#1f3d2b;
+  --fg-dim:#4c5f53;
+  --clay:#a8462a;
+  --gold:#8a6a2f;
+  --line:rgba(31,61,43,.18);
+  --glass:rgba(241,236,227,.82);
+  --mark:rgba(31,61,43,.22);
+  --sheen:rgba(31,61,43,.14);
+  --glow:rgba(31,61,43,.06);
+  --thread:rgba(31,61,43,.10);
+  --hero-scrim:linear-gradient(180deg,rgba(243,238,227,.92) 0%,rgba(243,238,227,.62) 42%,rgba(231,224,210,.94) 100%);
+}
+/* Day mode: cream and beige mixed into one continuous cloth field behind the page.
+   It is a fixed layer rather than a body background so the blend stays whole while
+   the page scrolls under it, and the two hairline repeating gradients read as weave. */
+html[data-theme=light]{background:#f3eee3}
+html[data-theme=light] body{background:transparent}
+html[data-theme=light] body::before{
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    repeating-linear-gradient(90deg,rgba(31,61,43,.030) 0 1px,transparent 1px 5px),
+    repeating-linear-gradient(0deg,rgba(31,61,43,.018) 0 1px,transparent 1px 5px),
+    radial-gradient(120% 85% at 12% -12%,#faf6ee 0%,rgba(250,246,238,0) 58%),
+    radial-gradient(115% 95% at 104% 108%,#d5c4a4 0%,rgba(213,196,164,0) 55%),
+    linear-gradient(168deg,#f5f0e5 0%,#ece2ce 46%,#e0d2b7 100%);
+}
+/* panels go translucent so the cloth keeps running underneath them instead of
+   stopping at every section edge */
+html[data-theme=light] .band,html[data-theme=light] #process,html[data-theme=light] #certs{
+  background:rgba(231,224,210,.55)}
+html[data-theme=light] .stat{background:rgba(243,238,227,.6)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--fg);font-family:var(--body);
+  font-size:clamp(15px,1.05vw,17px);line-height:1.65;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body.locked{overflow:hidden;height:100vh}
+img{display:block;width:100%;height:100%;object-fit:cover}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--clay);color:#fff}
+
+/* ============ scroll progress thread ============ */
+#thread{position:fixed;top:0;left:0;height:2px;width:100%;transform:scaleX(0);transform-origin:0 50%;
+  background:linear-gradient(90deg,var(--clay),var(--gold));z-index:90}
+
+/* ============ cursor ============ */
+#cursor{position:fixed;top:0;left:0;width:34px;height:34px;margin:-17px 0 0 -17px;border:1px solid var(--fg);
+  border-radius:50%;z-index:95;pointer-events:none;mix-blend-mode:difference;
+  transition:width .35s var(--ease),height .35s var(--ease),margin .35s var(--ease),background .35s}
+#cursor.big{width:86px;height:86px;margin:-43px 0 0 -43px;background:var(--fg)}
+@media (hover:none){#cursor{display:none}}
+
+/* ============ loader ============ */
+#loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center}
+#loader .half{position:absolute;left:0;width:100%;height:50.4%;background:var(--bg-2);
+  transition:transform 1.05s var(--ease) .15s}
+#loader .half.t{top:0}#loader .half.b{bottom:0}
+#loader .core{position:relative;z-index:2;text-align:center;transition:opacity .4s ease,transform .5s var(--ease)}
+#loader .word{font-family:var(--display);font-size:clamp(52px,13vw,168px);line-height:.9;letter-spacing:.02em;
+  text-transform:uppercase;overflow:hidden;display:flex;justify-content:center;gap:.01em}
+#loader .word span{display:inline-block;transform:translateY(108%);
+  animation:rise .9s var(--ease) forwards;animation-delay:calc(var(--i)*60ms + 120ms)}
+#loader .num{font-family:var(--display);font-size:clamp(28px,5vw,54px);color:var(--clay);margin-top:.2em;
+  font-variant-numeric:tabular-nums}
+#loader .rule{width:min(46vw,420px);height:1px;background:var(--line);margin:14px auto 0;position:relative}
+#loader .rule i{position:absolute;inset:0;background:var(--fg);transform:scaleX(0);transform-origin:0 50%;
+  transition:transform .12s linear}
+#loader.done .half.t{transform:translateY(-100%)}
+#loader.done .half.b{transform:translateY(100%)}
+#loader.done .core{opacity:0;transform:scaleY(1.35)}
+@keyframes rise{to{transform:translateY(0)}}
+
+/* ============ nav ============ */
+header{position:fixed;inset:0 0 auto;z-index:80;display:flex;align-items:center;justify-content:space-between;
+  gap:20px;padding:18px var(--pad);transition:background .5s var(--ease),padding .5s var(--ease),border-color .5s}
+header.stuck{background:var(--glass);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  padding-block:12px}
+.brand{font-family:var(--display);font-size:22px;letter-spacing:.06em;text-transform:uppercase;display:flex;
+  align-items:baseline;gap:8px}
+.brand small{font-family:var(--body);font-size:9px;letter-spacing:.22em;color:var(--fg-dim);text-transform:uppercase}
+nav{display:flex;gap:clamp(14px,2.2vw,34px);align-items:center}
+nav a{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;position:relative;padding:6px 0;color:var(--fg-dim);
+  transition:color .4s var(--ease)}
+nav a::after{content:'';position:absolute;left:0;bottom:0;width:100%;height:1px;background:var(--fg);
+  transform:scaleX(0);transform-origin:100% 50%;transition:transform .5s var(--ease)}
+nav a:hover,nav a.on{color:var(--fg)}
+nav a:hover::after,nav a.on::after{transform:scaleX(1);transform-origin:0 50%}
+.burger{display:none;width:44px;height:34px;border:1px solid var(--line);background:none;cursor:pointer;
+  align-items:center;justify-content:center;flex-direction:column;gap:5px;border-radius:var(--radius-sm)}
+.burger i{display:block;width:18px;height:1px;background:var(--fg);transition:transform .4s var(--ease),opacity .3s}
+.burger.x i:nth-child(1){transform:translateY(3px) rotate(45deg)}
+.burger.x i:nth-child(2){opacity:0}
+@media (max-width:900px){
+  nav{position:fixed;inset:0;flex-direction:column;justify-content:center;gap:22px;background:var(--bg);
+    transform:translateY(-100%);transition:transform .7s var(--ease);z-index:-1}
+  nav.open{transform:none}
+  nav a{font-size:15px;color:var(--fg)}
+  .burger{display:flex}
+}
+
+/* ============ day / night toggle ============ */
+#theme{position:relative;flex:none;width:88px;height:30px;border:1px solid var(--line);background:none;
+  cursor:pointer;padding:0;border-radius:15px;transition:border-color .4s var(--ease)}
+#theme:hover{border-color:var(--fg)}
+#theme .knob{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--fg);
+  transition:transform .6s var(--ease-stretch),background .4s var(--ease)}
+html[data-theme=light] #theme .knob{transform:translateX(58px)}
+#theme .d,#theme .n{position:absolute;top:0;bottom:0;display:flex;align-items:center;font-size:9px;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--fg-dim);transition:opacity .45s var(--ease)}
+#theme .d{left:12px;opacity:0}
+#theme .n{right:12px;opacity:1}
+html[data-theme=light] #theme .d{opacity:1}
+html[data-theme=light] #theme .n{opacity:0}
+/* colour cross-fade while the theme flips */
+html.theme-anim body,html.theme-anim header,html.theme-anim section,html.theme-anim footer,html.theme-anim nav,
+html.theme-anim .band,html.theme-anim .stat,html.theme-anim .cert,html.theme-anim .card,html.theme-anim .chip,
+html.theme-anim .pillar,html.theme-anim #loader{
+  transition:background-color .6s var(--ease),color .6s var(--ease),border-color .6s var(--ease)
+}
+
+/* ============ shared type ============ */
+.eyebrow{display:flex;align-items:center;gap:12px;font-size:11px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--fg-dim)}
+.eyebrow::before{content:'';width:34px;height:1px;background:var(--clay)}
+.h-xl{font-family:var(--display);text-transform:uppercase;line-height:.82;letter-spacing:.005em;
+  font-size:clamp(48px,10.5vw,178px)}
+.h-lg{font-family:var(--display);text-transform:uppercase;line-height:.88;font-size:clamp(34px,6.4vw,92px)}
+.h-md{font-family:var(--display);text-transform:uppercase;line-height:1;font-size:clamp(24px,3.2vw,44px)}
+.lead{font-size:clamp(17px,1.7vw,23px);line-height:1.5;color:var(--fg);max-width:34ch;font-weight:400}
+.muted{color:var(--fg-dim)}
+section{position:relative;padding:clamp(72px,11vh,150px) var(--pad)}
+
+/* word-mask reveal */
+.mask{display:inline-block;overflow:hidden;vertical-align:bottom}
+.mask>i{display:inline-block;font-style:normal;transform:translateY(105%);transition:transform .95s var(--ease);
+  transition-delay:calc(var(--w,0)*45ms)}
+.in .mask>i,.in.mask>i{transform:none}
+/* clip unroll reveal */
+.unroll{clip-path:inset(0 0 100% 0);transform:translateY(28px);
+  transition:clip-path 1.25s var(--ease),transform 1.25s var(--ease)}
+.in .unroll,.unroll.in{clip-path:inset(0 0 0 0);transform:none}
+.fade{opacity:0;transform:translateY(24px);transition:opacity 1s var(--ease),transform 1s var(--ease);
+  transition-delay:calc(var(--d,0)*1ms)}
+.in .fade,.fade.in{opacity:1;transform:none}
+
+/* ============ hero ============ */
+#home{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding-top:120px;
+  padding-bottom:0;overflow:hidden}
+/* the building photograph sits at the very back, the thread canvas above it, hero copy above that */
+#home .bgshot{position:absolute;inset:0;z-index:0;overflow:hidden;border-radius:var(--radius)}
+#home .bgshot i{position:absolute;inset:-12% 0;display:block;will-change:transform}
+#home .bgshot img{opacity:0;transform:scale(1.1);transition:opacity 1.8s var(--ease) .2s,transform 3s var(--ease);
+  object-position:50% 58%}
+#home.in .bgshot img{opacity:1;transform:scale(1)}
+/* scrim keeps the type readable: dark wash under cream letters at night, cream wash under the green by day */
+#home .bgshot::after{content:'';position:absolute;inset:0;background:var(--hero-scrim)}
+#threads{position:absolute;inset:0;z-index:1;opacity:.5}
+.hero-top{position:relative;z-index:2;display:flex;justify-content:space-between;gap:30px;align-items:flex-end;
+  flex-wrap:wrap;margin-bottom:clamp(20px,4vh,48px)}
+.hero-copy{max-width:44ch;position:relative;z-index:2}
+#stretch{position:relative;z-index:2;display:flex;gap:.02em;line-height:.8;cursor:default;padding-bottom:.06em}
+#stretch.clip{overflow:hidden}
+#stretch.clip span{transform:translateY(112%)}
+#stretch span{font-family:var(--display);font-size:clamp(64px,18vw,300px);text-transform:uppercase;
+  will-change:transform;display:block;transform-origin:50% 100%}
+
+/* Day mode takes its ink from --fg, which is the deep green #1f3d2b. Night mode keeps
+   cream, because a dark green on the near-black page would simply disappear. */
+.hero-foot{position:relative;z-index:2;display:grid;grid-template-columns:1fr;gap:clamp(24px,4vw,64px);
+  align-items:end;border-top:1px solid var(--line);padding:26px 0 30px;margin-top:clamp(18px,4vh,44px)}
+.scrollcue{display:flex;align-items:center;gap:10px;font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--fg-dim)}
+.scrollcue i{display:block;width:1px;height:46px;background:var(--line);position:relative;overflow:hidden}
+.scrollcue i::after{content:'';position:absolute;inset:0;background:var(--fg);animation:drip 2s var(--ease) infinite}
+@keyframes drip{0%{transform:translateY(-100%)}60%,100%{transform:translateY(100%)}}
+
+/* ============ marquee ============ */
+.band{border-block:1px solid var(--line);padding:0;overflow:hidden;background:var(--bg-2)}
+.band .track{display:flex;width:max-content;will-change:transform}
+.band .g{display:flex;align-items:center;gap:clamp(24px,4vw,64px);padding:clamp(14px,2.2vh,26px) clamp(12px,2vw,32px)}
+.band .t{font-family:var(--display);text-transform:uppercase;font-size:clamp(22px,3.4vw,52px);
+  letter-spacing:.02em;white-space:nowrap;color:var(--fg)}
+.band .t.o{color:transparent;-webkit-text-stroke:1px var(--fg-dim)}
+.band .dot{width:7px;height:7px;border-radius:50%;background:var(--clay);flex:none}
+
+/* ============ about ============ */
+#about{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,110px);align-items:start}
+.col-sticky{position:sticky;top:clamp(90px,14vh,140px)}
+.about-body p+p{margin-top:1.15em}
+.about-body{padding-top:clamp(0px,4vh,44px)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);margin-top:clamp(28px,5vh,54px);
+  border:1px solid var(--line)}
+.stat{background:var(--bg);padding:clamp(18px,2.4vw,30px);position:relative;overflow:hidden}
+.stat b{font-family:var(--display);font-size:clamp(38px,5.4vw,80px);line-height:.9;display:block;
+  font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-dim)}
+.stat::before{content:'';position:absolute;left:0;bottom:0;width:100%;height:2px;background:var(--clay);
+  transform:scaleX(0);transform-origin:0 50%;transition:transform 1.1s var(--ease) .3s}
+.in .stat::before{transform:scaleX(1)}
+.pillars{display:grid;gap:14px;margin-top:clamp(26px,4vh,44px)}
+.pillar{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:baseline;padding-bottom:14px;
+  border-bottom:1px solid var(--line)}
+.pillar em{font-family:var(--display);font-style:normal;color:var(--clay);font-size:15px;letter-spacing:.08em}
+@media (max-width:900px){#about{grid-template-columns:1fr}.col-sticky{position:static}}
+
+/* ============ process / vertical integration ============ */
+#process{background:var(--bg-2);border-block:1px solid var(--line)}
+.proc-wrap{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(30px,6vw,90px);align-items:start;margin-top:clamp(30px,5vh,60px)}
+.steps{position:relative;padding-left:34px}
+.steps .rail{position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:var(--line)}
+.steps .rail i{position:absolute;inset:0;background:linear-gradient(var(--clay),var(--gold));transform:scaleY(0);
+  transform-origin:50% 0;transition:transform .2s linear}
+.step{position:relative;padding:clamp(16px,2.6vh,30px) 0;opacity:.38;transition:opacity .6s var(--ease)}
+.step.on{opacity:1}
+.step::before{content:'';position:absolute;left:-34px;top:calc(clamp(16px,2.6vh,30px) + 8px);width:13px;height:13px;
+  border-radius:50%;border:1px solid var(--fg-dim);background:var(--bg-2);transition:background .5s,border-color .5s,transform .5s var(--ease-stretch)}
+.step.on::before{background:var(--clay);border-color:var(--clay);transform:scale(1.25)}
+.step h3{display:flex;align-items:baseline;gap:14px;font-family:var(--display);text-transform:uppercase;
+  font-size:clamp(26px,3.6vw,50px);line-height:1;font-weight:400}
+.step h3 u{text-decoration:none;font-family:var(--body);font-size:11px;letter-spacing:.2em;color:var(--fg-dim)}
+.step p{color:var(--fg-dim);max-width:40ch;margin-top:.5em;font-size:.94em}
+.stage{position:sticky;top:clamp(80px,12vh,120px);height:min(70vh,620px);overflow:hidden;border-radius:var(--radius)}
+.stage .lyr{position:absolute;inset:0;clip-path:inset(0 0 100% 0);transition:clip-path 1.15s var(--ease)}
+.stage .lyr.on{clip-path:inset(0 0 0 0)}
+.stage .lyr .in2{position:absolute;inset:0;transform:scale(1.14);transition:transform 2.4s var(--ease)}
+.stage .lyr.on .in2{transform:scale(1)}
+.stage .cap{position:absolute;left:0;bottom:0;z-index:3;padding:20px;width:100%;color:var(--on-img);
+  background:linear-gradient(transparent,rgba(13,13,14,.85));font-size:11px;letter-spacing:.22em;
+  text-transform:uppercase;display:flex;justify-content:space-between;gap:12px}
+@media (max-width:900px){.proc-wrap{grid-template-columns:1fr}.stage{position:static;height:52vh}}
+
+/* ============ collections (pinned horizontal) ============ */
+#collections{padding-inline:0}
+#collections .head{padding-inline:var(--pad)}
+.pin{height:340vh;position:relative}
+.pin-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden}
+.row{display:flex;gap:clamp(16px,2.4vw,34px);padding-inline:var(--pad);will-change:transform}
+.card{position:relative;flex:none;width:clamp(250px,31vw,430px);height:min(64vh,560px);overflow:hidden;
+  background:var(--bg-3);border-radius:var(--radius);color:var(--on-img)}
+.card .ph{position:absolute;inset:0}
+.card .ph i{position:absolute;inset:0;transform:scale(1.18);transition:transform 1.4s var(--ease)}
+.card:hover .ph i{transform:scale(1.02)}
+.card .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,13,14,.15),rgba(13,13,14,.9));
+  transition:opacity .6s}
+.card .txt{position:absolute;inset:auto 0 0;padding:clamp(16px,2vw,26px);z-index:2}
+.card .txt h3{font-family:var(--display);text-transform:uppercase;font-size:clamp(24px,2.9vw,42px);line-height:.95;font-weight:400}
+.card .txt p{font-size:.85em;color:var(--on-img-dim);margin-top:.5em;max-height:0;opacity:0;overflow:hidden;
+  transition:max-height .7s var(--ease),opacity .5s}
+.card:hover .txt p{max-height:9em;opacity:1}
+.card .no{position:absolute;top:0;right:0;z-index:2;padding:14px 16px;font-family:var(--display);font-size:14px;
+  letter-spacing:.1em;color:var(--on-img-dim)}
+.card .sheen{position:absolute;inset:0;z-index:1;background:linear-gradient(115deg,transparent 40%,var(--sheen) 50%,transparent 60%);
+  transform:translateX(-100%);transition:transform 1s var(--ease)}
+.card:hover .sheen{transform:translateX(100%)}
+@media (max-width:820px){
+  .pin{height:auto}
+  .pin-sticky{position:static;height:auto;padding-block:26px}
+  .row{overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:16px;transform:none!important;width:max-content}
+  .card{scroll-snap-align:center}
+}
+
+/* ============ split feature ============ */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(26px,5vw,80px);align-items:center}
+.split .media{position:relative;height:min(72vh,640px);overflow:hidden;border-radius:var(--radius)}
+.split .media .px{position:absolute;inset:-12% 0;will-change:transform}
+.split .media .tagline{position:absolute;z-index:2;left:0;top:50%;transform:rotate(-90deg);transform-origin:0 0;
+  font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--on-img);padding-left:14px}
+.chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:clamp(20px,3vh,32px)}
+.chip{border:1px solid var(--line);padding:9px 15px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--fg-dim);border-radius:var(--radius-sm);
+  transition:color .4s,border-color .4s,transform .5s var(--ease-stretch);cursor:default}
+.chip:hover{color:var(--bg);background:var(--fg);border-color:var(--fg);transform:translateY(-3px)}
+@media (max-width:900px){.split{grid-template-columns:1fr}.split .media{height:52vh}}
+
+/* ============ certification ============ */
+#certs{background:var(--bg-2);border-block:1px solid var(--line)}
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--line);
+  margin-top:clamp(28px,5vh,52px);border:1px solid var(--line)}
+.cert{background:var(--bg-2);padding:clamp(20px,2.6vw,34px);position:relative;overflow:hidden;
+  transition:background .6s var(--ease)}
+.cert:hover{background:var(--bg-3)}
+.cert b{font-family:var(--display);font-size:clamp(20px,2.2vw,30px);text-transform:uppercase;display:block;font-weight:400}
+.cert span{font-size:.85em;color:var(--fg-dim);display:block;margin-top:.6em}
+.cert .gl{position:absolute;left:-40%;top:0;width:34%;height:100%;background:var(--glow);
+  transform:skewX(-16deg) translateX(-300%);transition:transform .9s var(--ease)}
+.cert:hover .gl{transform:skewX(-16deg) translateX(420%)}
+
+/* ============ contact ============ */
+#contact{padding-bottom:clamp(40px,6vh,70px)}
+.mail{display:inline-block;font-family:var(--display);text-transform:uppercase;
+  font-size:clamp(30px,7.4vw,118px);line-height:.9;letter-spacing:.005em;position:relative;cursor:pointer}
+.mail .u{position:absolute;left:0;bottom:.04em;height:2px;width:100%;background:var(--fg);transform:scaleX(0);
+  transform-origin:100% 50%;transition:transform .7s var(--ease)}
+.mail:hover .u{transform:scaleX(1);transform-origin:0 50%}
+.mail i{display:inline-block;font-style:normal}
+.mail:hover i:not(.u){animation:pull .8s var(--ease-stretch);animation-delay:calc(var(--i)*45ms)}
+@keyframes pull{35%{transform:translateY(-.11em) scaleY(1.16) scaleX(.94)}100%{transform:none}}
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:clamp(20px,3vw,40px);
+  margin-top:clamp(34px,6vh,64px);border-top:1px solid var(--line);padding-top:clamp(24px,4vh,40px)}
+.contact-grid h4{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--fg-dim);font-weight:500}
+.contact-grid p{margin-top:.7em}
+.contact-grid a:hover{color:var(--clay)}
+
+/* ============ buttons ============ */
+.btn{position:relative;display:inline-flex;align-items:center;gap:12px;padding:15px 26px;border:1px solid var(--fg);
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase;overflow:hidden;will-change:transform;
+  border-radius:var(--radius);transition:color .5s var(--ease)}
+.btn span{position:relative;z-index:2}
+.btn::before{content:'';position:absolute;inset:0;background:var(--fg);transform:translateY(101%);
+  transition:transform .6s var(--ease);z-index:1}
+.btn:hover{color:var(--bg)}
+.btn:hover::before{transform:translateY(0)}
+.btn.solid{background:var(--clay);border-color:var(--clay);color:#fff}
+.btn.solid::before{background:var(--fg)}
+
+/* ============ footer ============ */
+footer{padding:clamp(30px,5vh,56px) var(--pad);border-top:1px solid var(--line);display:flex;flex-wrap:wrap;
+  gap:20px;justify-content:space-between;align-items:center;font-size:12px;color:var(--fg-dim)}
+footer .foot-mark{font-family:var(--display);font-size:clamp(40px,11vw,150px);line-height:.8;text-transform:uppercase;
+  color:transparent;-webkit-text-stroke:.012em var(--mark);width:100%;letter-spacing:.02em}
+
+/* ============ display weights ============ */
+/* The display face is Bahnschrift, a variable DIN-style face, so it has a real semibold
+   on its weight axis. Impact — the previous face — ships only one weight and browsers do
+   not synthesise a lighter one, which is why the headings had to change face, not just
+   the number. Only the outline rule below uses a stroke, where hollow letterforms are
+   the point. */
+.h-xl,.h-lg,.h-md,.brand,#stretch span,#loader .word span,#loader .num,
+.stat b,.card .txt h3,.step h3,.band .t,.mail,.cert b{
+  font-weight:600;
+}
+.band .t.o{color:transparent;-webkit-text-stroke:1.2px var(--fg-dim)}
+.subline{font-size:clamp(12px,1.15vw,16px);font-weight:600;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--fg-dim);margin-top:14px}
+.stat span,.card .no,.contact-grid h4,.scrollcue,.btn span,.step h3 u,.cap span,.chip{font-weight:600}
+.about-body p,.muted,.card .txt p,.cert span{font-weight:400}
+
+/* ============ reduced motion ============ */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important}
+  .mask>i{transform:none}.unroll{clip-path:none;transform:none}.fade{opacity:1;transform:none}
+  #home .bgshot img{opacity:1;transform:none}
+  .pin{height:auto}.pin-sticky{position:static;height:auto}.row{transform:none!important;flex-wrap:wrap}
+  .card{width:min(100%,340px)}
+}
+</style>
+<script>
+/* applied before first paint so a saved day mode never flashes dark */
+(function(){try{if(localStorage.getItem('magna-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}})();
+</script>
+</head>
+<body class="locked">
+
+<div id="thread"></div>
+<div id="cursor" aria-hidden="true"></div>
+
+<!-- ============ LOADER ============ -->
+<div id="loader" role="status" aria-live="polite">
+  <div class="half t"></div><div class="half b"></div>
+  <div class="core">
+    <div class="word" id="loadword" aria-label="Magna Processing"></div>
+    <div class="num" id="loadnum">0</div>
+    <div class="rule"><i id="loadbar"></i></div>
+  </div>
+</div>
+
+<!-- ============ NAV ============ -->
+<header id="bar">
+  <a href="#home" class="brand" data-cursor>Magna<small>Est. 1965</small></a>
+  <nav id="nav">
+    <a href="#about">About</a>
+    <a href="#process">Process</a>
+    <a href="#collections">Products</a>
+    <a href="#printing">Printing</a>
+    <a href="#certs">Certification</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <div style="display:flex;gap:14px;align-items:center">
+    <button id="theme" type="button" aria-label="Switch to day mode" title="Day / night" data-cursor>
+      <span class="knob"></span><span class="d">Day</span><span class="n">Night</span>
+    </button>
+    <a href="#contact" class="btn magnetic" data-cursor style="padding:11px 18px"><span>Enquire</span></a>
+    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><i></i><i></i></button>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section id="home">
+  <div class="bgshot" aria-hidden="true"><i data-parallax="90"><img src="images/building.jpg" alt=""></i></div>
+  <canvas id="threads" aria-hidden="true"></canvas>
+
+  <div class="hero-top">
+    <div class="hero-copy">
+      <p class="eyebrow" style="--w:0"><span class="mask"><i>Textile printing &amp; fabric processing</i></span></p>
+      <p class="lead fade" style="--d:260;margin-top:18px">Faisalabad, Pakistan — a vertically integrated home
+        textile house taking cotton from sizing to stitched finished goods since 1965.</p>
+    </div>
+    <div class="scrollcue fade" style="--d:400"><i></i>Scroll</div>
+  </div>
+
+  <h1 id="stretch" aria-label="Magna Processing">
+    <span data-ch="M">M</span><span data-ch="A">A</span><span data-ch="G">G</span><span data-ch="N">N</span><span data-ch="A">A</span>
+  </h1>
+  <p class="subline fade" style="--d:120">
+    Processing Industries (Pvt) Ltd — Commitment with Quality</p>
+
+  <div class="hero-foot">
+    <div>
+      <p class="muted" style="max-width:46ch">More than fifty years of experience behind one of the region’s most
+        reliable printing and processing houses: rotary, flatbed and digital, on woven and microfiber cloth,
+        finished and packed for retail and mail order worldwide.</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:26px">
+        <a href="#collections" class="btn solid magnetic" data-cursor><span>View collections</span></a>
+        <a href="#process" class="btn magnetic" data-cursor><span>How we make it</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE 1 ============ -->
+<div class="band" id="band1">
+  <div class="track">
+    <div class="g">
+      <div class="t">Bed Linen</div><div class="dot"></div>
+      <div class="t o">Curtains</div><div class="dot"></div>
+      <div class="t">Quilted Products</div><div class="dot"></div>
+      <div class="t o">Kitchen Linen</div><div class="dot"></div>
+      <div class="t">Microfiber</div><div class="dot"></div>
+      <div class="t o">Furnishings</div><div class="dot"></div>
+    </div>
+    <div class="g" aria-hidden="true">
+      <div class="t">Bed Linen</div><div class="dot"></div>
+      <div class="t o">Curtains</div><div class="dot"></div>
+      <div class="t">Quilted Products</div><div class="dot"></div>
+      <div class="t o">Kitchen Linen</div><div class="dot"></div>
+      <div class="t">Microfiber</div><div class="dot"></div>
+      <div class="t o">Furnishings</div><div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ABOUT ============ -->
+<section id="about">
+  <div class="col-sticky">
+    <p class="eyebrow" style="--w:0"><span class="mask"><i>About us</i></span></p>
+    <h2 class="h-lg" style="margin-top:18px">
+      <span class="mask" style="--w:1"><i>One</i></span>
+      <span class="mask" style="--w:2"><i>group,</i></span><br>
+      <span class="mask" style="--w:3"><i>every</i></span>
+      <span class="mask" style="--w:4"><i>stage</i></span><br>
+      <span class="mask" style="--w:5"><i>in-house.</i></span>
+    </h2>
+    <div class="stats">
+      <div class="stat"><b data-count="1965" data-plain>1965</b><span>Founded</span></div>
+      <div class="stat"><b data-count="58">0</b><span>Years of trade</span></div>
+      <div class="stat"><b data-count="500">0</b><span>Workforce</span></div>
+      <div class="stat"><b data-count="8">0</b><span>Rotary machines</span></div>
+    </div>
+  </div>
+
+  <div class="about-body">
+    <p class="lead fade">Magna Group is a vertically integrated unit including sizing, warping, weaving, processing
+      and stitching — so the yarn that enters is the finished bed sheet that leaves.</p>
+    <p class="fade" style="--d:120;margin-top:1.2em">Being one of the pioneers in the trade, Magna made forays into
+      fabric printing and processing and has grown into a reliable partner for retail, mail order and contract
+      buyers across Europe, the Middle East and North America. Our philosophy is simple: give the client a single
+      source for the whole job, with control over quality at every intermediate stage.</p>
+    <p class="fade" style="--d:200;margin-top:1.2em">The product range covers bed linen, curtains, quilted products,
+      furnishings, kitchen linen and apparel — in printed, dyed and white, on flat, dobby and jacquard
+      constructions, plus a growing microfiber programme.</p>
+
+    <div class="pillars">
+      <div class="pillar fade" style="--d:60"><em>01</em><p><b>Single source.</b> Weaving through stitching under one roof means shorter lead times and no blame passed between suppliers.</p></div>
+      <div class="pillar fade" style="--d:140"><em>02</em><p><b>Print flexibility.</b> Rotary for volume repeat patterns, flatbed for larger blocks, digital for sampling and small runs.</p></div>
+      <div class="pillar fade" style="--d:220"><em>03</em><p><b>Finished to retail.</b> Embellished and customised articles, packed and labelled to the buyer’s own programme.</p></div>
+      <div class="pillar fade" style="--d:300"><em>04</em><p><b>Audit-ready.</b> Compliance, traceability and social audits maintained across the group.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESS ============ -->
+<section id="process">
+  <p class="eyebrow" style="--w:0"><span class="mask"><i>Vertical integration</i></span></p>
+  <h2 class="h-lg" style="margin-top:16px;max-width:16ch">
+    <span class="mask" style="--w:1"><i>From</i></span> <span class="mask" style="--w:2"><i>sizing</i></span>
+    <span class="mask" style="--w:3"><i>to</i></span> <span class="mask" style="--w:4"><i>stitching.</i></span>
+  </h2>
+
+  <div class="proc-wrap">
+    <div class="steps" id="steps">
+      <div class="rail"><i id="railfill"></i></div>
+
+      <article class="step" data-stage="0">
+        <h3>Sizing <u>01</u></h3>
+        <p>Warp yarns are sized to survive the loom — the quiet step that decides fabric cleanliness later.</p>
+      </article>
+      <article class="step" data-stage="1">
+        <h3>Warping <u>02</u></h3>
+        <p>Yarn is beamed at even tension and density, giving the cloth its construction and weight.</p>
+      </article>
+      <article class="step" data-stage="2">
+        <h3>Weaving <u>03</u></h3>
+        <p>Flat, dobby and jacquard goods produced in-house, greige ready for the processing floor.</p>
+      </article>
+      <article class="step" data-stage="3">
+        <h3>Processing <u>04</u></h3>
+        <p>Bleaching, dyeing, printing and finishing: rotary, flatbed and digital lines with full colour control.</p>
+      </article>
+      <article class="step" data-stage="4">
+        <h3>Stitching <u>05</u></h3>
+        <p>Cutting, stitching, embellishment and packing into retail-ready bed linen and furnishing sets.</p>
+      </article>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="lyr on" data-l="0"><div class="in2"><img src="images/macro.jpg" alt="Macro of woven threads"></div></div>
+      <div class="lyr" data-l="1"><div class="in2"><img src="images/warp.jpg" alt="Warp threads on a loom"></div></div>
+      <div class="lyr" data-l="2"><div class="in2"><img src="images/warp.jpg" alt="Weaving" style="transform:scaleX(-1)"></div></div>
+      <div class="lyr" data-l="3"><div class="in2"><img src="images/printing.jpg" alt="Rotary screen printing machine"></div></div>
+      <div class="lyr" data-l="4"><div class="in2"><img src="images/bed-linen.jpg" alt="Finished folded bed linen"></div></div>
+      <div class="cap"><span id="capname">Sizing</span><span id="capno">01 / 05</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COLLECTIONS ============ -->
+<section id="collections">
+  <div class="head">
+    <p class="eyebrow" style="--w:0"><span class="mask"><i>Collections</i></span></p>
+    <h2 class="h-lg" style="margin-top:16px">
+      <span class="mask" style="--w:1"><i>Printed,</i></span>
+      <span class="mask" style="--w:2"><i>dyed</i></span>
+      <span class="mask" style="--w:3"><i>&amp; white.</i></span>
+    </h2>
+    <p class="muted fade" style="--d:200;margin-top:18px;max-width:52ch">Fully embellished and customised articles
+      for retail and mail order. Drag or scroll sideways — each range is built to the buyer’s own construction,
+      weight and colour standard.</p>
+  </div>
+
+  <div class="pin" id="pin">
+    <div class="pin-sticky">
+      <div class="row" id="row">
+        <article class="card" data-cursor>
+          <div class="ph"><i><img src="images/bed-linen.jpg" alt="Printed bed linen set"></i></div>
+          <div class="sheen"></div><div class="veil"></div>
+          <div class="no">01</div>
+          <div class="txt"><h3>Bed Linen</h3><p>Printed, dyed and white bed sheet sets, fitted sheets, duvets and
+            duvet covers, bed skirts and pillows.</p></div>
+        </article>
+        <article class="card" data-cursor>
+          <div class="ph"><i><img src="images/curtain.jpg" alt="Draped curtains"></i></div>
+          <div class="sheen"></div><div class="veil"></div>
+          <div class="no">02</div>
+          <div class="txt"><h3>Curtains</h3><p>Curtain panels and sofa covers in woven, burnout and coated
+            constructions, made to measure for furnishing programmes.</p></div>
+        </article>
+        <article class="card" data-cursor>
+          <div class="ph"><i><img src="images/hero-fabric.jpg" alt="Quilted fabric"></i></div>
+          <div class="sheen"></div><div class="veil"></div>
+          <div class="no">03</div>
+          <div class="txt"><h3>Quilted Products</h3><p>Quilts, coverlets and padded bed tops, stitched and finished
+            in our own sewing units.</p></div>
+        </article>
+        <article class="card" data-cursor>
+          <div class="ph"><i><img src="images/macro.jpg" alt="Microfiber texture"></i></div>
+          <div class="sheen"></div><div class="veil"></div>
+          <div class="no">04</div>
+          <div class="txt"><h3>Microfiber</h3><p>The newer side of the range: soft, fast-drying microfiber goods for
+            bath, kitchen and travel.</p></div>
+        </article>
+        <article class="card" data-cursor>
+          <div class="ph"><i><img src="images/printing.jpg" alt="Kitchen linen printing"></i></div>
+          <div class="sheen"></div><div class="veil"></div>
+          <div class="no">05</div>
+          <div class="txt"><h3>Kitchen Linen</h3><p>Tea towels, napkins and aprons — printed and dyed, packed as
+            coordinated sets.</p></div>
+        </article>
+        <article class="card" data-cursor>
+          <div class="ph"><i><img src="images/warp.jpg" alt="Apparel fabric"></i></div>
+          <div class="sheen"></div><div class="veil"></div>
+          <div class="no">06</div>
+          <div class="txt"><h3>Furnishings &amp; Apparel</h3><p>Upholstery, cushion covers and apparel fabric in
+            plain dyed, printed, flock and puff-print finishes.</p></div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRINTING ============ -->
+<section id="printing">
+  <div class="split">
+    <div class="media unroll">
+      <div class="px" data-parallax="70"><img src="images/printing.jpg" alt="Rotary screen printing machine running"></div>
+      <div class="tagline">Processing floor</div>
+    </div>
+    <div>
+      <p class="eyebrow" style="--w:0"><span class="mask"><i>Printing &amp; finishing</i></span></p>
+      <h2 class="h-lg" style="margin-top:16px">
+        <span class="mask" style="--w:1"><i>Three</i></span>
+        <span class="mask" style="--w:2"><i>ways</i></span><br>
+        <span class="mask" style="--w:3"><i>to put</i></span>
+        <span class="mask" style="--w:4"><i>colour</i></span><br>
+        <span class="mask" style="--w:5"><i>on cloth.</i></span>
+      </h2>
+      <p class="fade" style="--d:160;margin-top:22px;color:var(--fg-dim);max-width:46ch">Eight rotary screens run
+        repeat patterns at volume, flatbeds take the larger blocks and wide repeats, and digital handles sampling,
+        small designer runs and photoreal designs without screens at all. Pigment, reactive and disperse printing
+        are all supported, with finishing to match.</p>
+      <div class="chips">
+        <span class="chip fade" style="--d:60">Rotary — 8 machines</span>
+        <span class="chip fade" style="--d:110">Flatbed</span>
+        <span class="chip fade" style="--d:160">Digital</span>
+        <span class="chip fade" style="--d:210">Pigment</span>
+        <span class="chip fade" style="--d:260">Reactive</span>
+        <span class="chip fade" style="--d:310">Disperse</span>
+        <span class="chip fade" style="--d:360">Burnout</span>
+        <span class="chip fade" style="--d:410">Flock &amp; puff print</span>
+        <span class="chip fade" style="--d:460">Coating</span>
+        <span class="chip fade" style="--d:510">Calendering</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CERTIFICATION ============ -->
+<section id="certs">
+  <p class="eyebrow" style="--w:0"><span class="mask"><i>Certification &amp; compliance</i></span></p>
+  <h2 class="h-lg" style="margin-top:16px;max-width:18ch">
+    <span class="mask" style="--w:1"><i>Documented,</i></span>
+    <span class="mask" style="--w:2"><i>audited,</i></span>
+    <span class="mask" style="--w:3"><i>traceable.</i></span>
+  </h2>
+  <div class="cert-grid">
+    <div class="cert fade" style="--d:0"><div class="gl"></div><b>ISO 9001</b><span>Quality management across
+      planning, production and final inspection.</span></div>
+    <div class="cert fade" style="--d:90"><div class="gl"></div><b>OEKO-TEX</b><span>Standard 100 tested articles for
+      harmful substances.</span></div>
+    <div class="cert fade" style="--d:180"><div class="gl"></div><b>Social Compliance</b><span>SMETA-style audits on
+      labour, health, safety and environment.</span></div>
+    <div class="cert fade" style="--d:270"><div class="gl"></div><b>Traceability</b><span>Lot-level records from beam
+      to bale, available to the buyer on request.</span></div>
+  </div>
+  <p class="muted fade" style="--d:340;margin-top:22px;font-size:.85em">Demonstration content — certificate numbers
+    and current scope should be confirmed against the originals before publication.</p>
+</section>
+
+<!-- ============ MARQUEE 2 ============ -->
+<div class="band rev" id="band2">
+  <div class="track">
+    <div class="g">
+      <div class="t o">Commitment with Quality</div><div class="dot"></div>
+      <div class="t">Since 1965</div><div class="dot"></div>
+      <div class="t o">Faisalabad</div><div class="dot"></div>
+      <div class="t">Made to order</div><div class="dot"></div>
+    </div>
+    <div class="g" aria-hidden="true">
+      <div class="t o">Commitment with Quality</div><div class="dot"></div>
+      <div class="t">Since 1965</div><div class="dot"></div>
+      <div class="t o">Faisalabad</div><div class="dot"></div>
+      <div class="t">Made to order</div><div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact">
+  <p class="eyebrow" style="--w:0"><span class="mask"><i>Enquiries</i></span></p>
+  <h2 class="h-lg" style="margin-top:16px">
+    <span class="mask" style="--w:1"><i>Tell us</i></span>
+    <span class="mask" style="--w:2"><i>what</i></span>
+    <span class="mask" style="--w:3"><i>you need</i></span>
+    <span class="mask" style="--w:4"><i>made.</i></span>
+  </h2>
+  <div style="margin-top:clamp(28px,5vh,54px)">
+    <a class="mail" id="mail" href="mailto:info@magnaprocessing.com" data-cursor>info@magnaprocessing.com<i class="u"></i></a>
+  </div>
+  <div class="contact-grid">
+    <div class="fade" style="--d:0"><h4>Telephone</h4><p><a href="tel:+92412424070">+(92) 41&nbsp;2424070</a><br>
+      <span class="muted">71, 72, 74 — same exchange</span></p></div>
+    <div class="fade" style="--d:90"><h4>Works</h4><p>Magna Processing Industries (Pvt) Ltd<br>
+      <span class="muted">Faisalabad, Pakistan</span></p></div>
+    <div class="fade" style="--d:180"><h4>Trade</h4><p>Bed linen · Curtains · Quilts<br>
+      <span class="muted">Kitchen linen · Microfiber · Furnishings</span></p></div>
+    <div class="fade" style="--d:270"><h4>Sampling</h4><p>Digital prints in 7–10 days<br>
+      <span class="muted">Rotary runs from repeat order</span></p></div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-mark">Magna Processing</div>
+  <div>© <span id="yr">2026</span> Magna Processing Industries (Pvt) Ltd</div>
+  <div>Demo build · motion study after Liebre</div>
+  <a href="#home" class="btn magnetic" data-cursor><span>Back to top</span></a>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+  var RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var COARSE = matchMedia('(hover: none)').matches;
+  var clamp = function(v,a,b){ return v<a?a:(v>b?b:v); };
+  var lerp  = function(a,b,n){ return a+(b-a)*n; };
+
+  /* ---------- loader ---------- */
+  var loader=document.getElementById('loader'), num=document.getElementById('loadnum'),
+      bar=document.getElementById('loadbar'), lw=document.getElementById('loadword');
+  'MAGNA'.split('').forEach(function(c,i){
+    var s=document.createElement('span'); s.textContent=c; s.style.setProperty('--i',i); lw.appendChild(s);
+  });
+  var p=0, t0=performance.now();
+  (function tickLoad(now){
+    p = RM ? 100 : clamp((now-t0)/1500*100,0,100);
+    num.textContent = Math.round(p);
+    bar.style.transform = 'scaleX('+(p/100)+')';
+    if(p<100){ requestAnimationFrame(tickLoad); } else { finish(); }
+  })(t0);
+  function finish(){
+    document.body.classList.remove('locked');
+    loader.classList.add('done');
+    setTimeout(function(){ loader.remove(); heroIn(); }, RM?60:1250);
+  }
+
+  /* ---------- word-mask stagger index ---------- */
+  document.querySelectorAll('.mask').forEach(function(m){
+    if(!m.style.getPropertyValue('--w')) m.style.setProperty('--w',0);
+  });
+
+  /* ---------- reveal pass (scroll-driven, no IO dependency) ---------- */
+  var rev=[].slice.call(document.querySelectorAll('section, .stats, .band, footer, .unroll, .fade, .mask'));
+  var counters=[].slice.call(document.querySelectorAll('[data-count]'));
+  function runCount(el){
+    var to=+el.dataset.count;
+    if(el.hasAttribute('data-plain')){ el.textContent=to; return; }
+    var s=performance.now(), dur=RM?1:1500;
+    (function step(now){
+      var k=clamp((now-s)/dur,0,1), ease=1-Math.pow(1-k,3);
+      el.textContent=Math.round(to*ease);
+      if(k<1) requestAnimationFrame(step);
+    })(s);
+  }
+  function revealPass(){
+    var vh=innerHeight;
+    for(var i=rev.length-1;i>=0;i--){
+      if(rev[i].getBoundingClientRect().top < vh*0.9){ rev[i].classList.add('in'); rev.splice(i,1); }
+    }
+    for(var j=counters.length-1;j>=0;j--){
+      if(counters[j].getBoundingClientRect().top < vh*0.85){ runCount(counters[j]); counters.splice(j,1); }
+    }
+  }
+  function heroIn(){ document.getElementById('home').classList.add('in'); introStart=performance.now(); revealPass(); }
+
+  /* ---------- scroll progress + nav state ---------- */
+  var thread=document.getElementById('thread'), barEl=document.getElementById('bar'),
+      links=[].slice.call(document.querySelectorAll('nav a')),
+      secs=links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  var lastY=0, vel=0;
+  function onScroll(){
+    var y=scrollY, h=document.documentElement.scrollHeight-innerHeight;
+    thread.style.transform='scaleX('+(h>0?clamp(y/h,0,1):0)+')';
+    barEl.classList.toggle('stuck', y>innerHeight*.5);
+    vel = lerp(vel, clamp(Math.abs(y-lastY)/28,0,3), .2); lastY=y;
+    var idx=-1;
+    secs.forEach(function(s,i){ if(s && s.getBoundingClientRect().top<=innerHeight*.42) idx=i; });
+    links.forEach(function(a,i){ a.classList.toggle('on', i===idx); });
+    railUpdate(); pinUpdate(); revealPass();
+  }
+  addEventListener('scroll', onScroll, {passive:true});
+  addEventListener('resize', function(){ sizeCanvas(); pinUpdate(); }, {passive:true});
+
+  /* ---------- marquee: offset driven by scroll velocity ---------- */
+  var bands=[].slice.call(document.querySelectorAll('.band')).map(function(b){
+    return {el:b, track:b.querySelector('.track'), x:0, dir:b.classList.contains('rev')?-1:1, w:0};
+  });
+  function measureBands(){ bands.forEach(function(b){ b.w=b.track.children[0].offsetWidth; }); }
+  measureBands();
+  (function marqueeLoop(){
+    vel = lerp(vel, 0, .04);                       // decay when the page stops
+    bands.forEach(function(b){
+      if(!b.w) measureBands();
+      b.x -= (0.55 + vel*2.6) * b.dir;
+      if(Math.abs(b.x) >= b.w) b.x = b.x % b.w;
+      b.track.style.transform='translate3d('+b.x+'px,0,0)';
+    });
+    requestAnimationFrame(marqueeLoop);
+  })();
+
+  /* ---------- elastic stretched logotype (Liebre signature) ---------- */
+  var word=document.getElementById('stretch'), letters=[].slice.call(word.children);
+  if(!COARSE && !RM) word.classList.add('clip');
+  var introStart=0, intro=0;
+  letters.forEach(function(l){ l.dataset.kx='1'; l.dataset.ky='1'; });
+  var mx=innerWidth/2, my=-innerHeight, tx=mx, ty=my;
+  if(!COARSE && !RM){
+    addEventListener('mousemove', function(e){ mx=e.clientX; my=e.clientY; }, {passive:true});
+  }
+  var cursor=document.getElementById('cursor');
+  function letterPhysics(){
+    if(!introStart) return;
+    if(intro<1 && !RM){ intro = clamp((performance.now()-introStart)/1100,0,1); }
+    else if(RM){ intro=1; }
+    if(intro>=1) word.classList.remove('clip');
+    var e = 1-Math.pow(1-intro,3);
+    letters.forEach(function(l,i){
+      var r=l.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+      var dx=mx-cx, dy=my-cy, dist=Math.hypot(dx,dy), R=r.height*1.15;
+      var f = dist<R ? 1-dist/R : 0;
+      var kx=parseFloat(l.dataset.kx), ky=parseFloat(l.dataset.ky);
+      kx = lerp(kx, 1+f*0.55, .12);              // stretch along the pull
+      ky = lerp(ky, 1-f*0.30, .12);              // squash across it
+      l.dataset.kx=kx; l.dataset.ky=ky;
+      var side = dx<0?-1:1, dly = i*0.08;
+      var ie = clamp((intro-dly)/(1-dly),0,1), e2 = 1-Math.pow(1-ie,3);
+      l.style.transform =
+        'translateY('+((1-e2)*112)+'%) '+
+        'translate('+(dx*0.03*f*e2)+'px,'+(dy*0.05*f*e2)+'px) '+
+        'rotate('+(-f*4*side*e2)+'deg) skewX('+(f*6*side*e2)+'deg) '+
+        'scaleX('+kx+') scaleY('+ky+')';
+    });
+  }
+  function cursorLoop(){
+    tx=lerp(tx,mx,.16); ty=lerp(ty,my,.16);
+    cursor.style.transform='translate('+tx+'px,'+ty+'px)';
+    if(!RM) letterPhysics();
+    requestAnimationFrame(cursorLoop);
+  }
+  if(!COARSE){ cursorLoop(); } else { cursor.remove(); }
+  document.querySelectorAll('[data-cursor]').forEach(function(el){
+    el.addEventListener('mouseenter',function(){ cursor.classList && cursor.classList.add('big'); });
+    el.addEventListener('mouseleave',function(){ cursor.classList && cursor.classList.remove('big'); });
+  });
+
+  /* ---------- magnetic buttons ---------- */
+  if(!COARSE && !RM){
+    document.querySelectorAll('.magnetic').forEach(function(b){
+      b.addEventListener('mousemove',function(e){
+        var r=b.getBoundingClientRect();
+        b.style.transform='translate('+((e.clientX-r.left-r.width/2)*.28)+'px,'+((e.clientY-r.top-r.height/2)*.34)+'px)';
+      });
+      b.addEventListener('mouseleave',function(){ b.style.transform=''; b.style.transition='transform .6s var(--ease)';
+        setTimeout(function(){ b.style.transition=''; },600); });
+    });
+  }
+
+  /* ---------- day / night ---------- */
+  var root=document.documentElement, tbtn=document.getElementById('theme'),
+      THREADC='rgba(241,236,227,.075)';
+  function readThreadColor(){
+    var v=getComputedStyle(root).getPropertyValue('--thread').trim();
+    if(v) THREADC=v;
+  }
+  function setTheme(t,animate){
+    if(t==='light') root.setAttribute('data-theme','light'); else root.removeAttribute('data-theme');
+    tbtn.setAttribute('aria-label', t==='light' ? 'Switch to night mode' : 'Switch to day mode');
+    if(animate && !RM){
+      root.classList.add('theme-anim');
+      setTimeout(function(){ root.classList.remove('theme-anim'); },700);
+    }
+    try{ localStorage.setItem('magna-theme', t); }catch(e){}
+    readThreadColor();
+  }
+  var stored='dark';
+  try{ stored = localStorage.getItem('magna-theme') || 'dark'; }catch(e){}
+  readThreadColor();
+  tbtn.setAttribute('aria-label', stored==='light' ? 'Switch to night mode' : 'Switch to day mode');
+  tbtn.addEventListener('click', function(){
+    setTheme(root.getAttribute('data-theme')==='light' ? 'dark' : 'light', true);
+  });
+
+  /* ---------- hero thread canvas ---------- */
+  var cv=document.getElementById('threads'), cx=cv.getContext('2d'), W=0,H=0,cols=[];
+  function sizeCanvas(){
+    var r=cv.parentElement.getBoundingClientRect();
+    W=cv.width=r.width; H=cv.height=r.height;
+    var n=Math.max(14,Math.round(W/44)); cols=[];
+    for(var i=0;i<n;i++){ cols.push({x:(i+.5)*W/n, amp:8+Math.random()*26, ph:Math.random()*6.28,
+      sp:.18+Math.random()*.5, w:Math.random()<.12?1.4:.6}); }
+  }
+  sizeCanvas();
+  var tt=0;
+  function drawThreads(){
+    tt+=0.006;
+    cx.clearRect(0,0,W,H);
+    cols.forEach(function(c){
+      cx.beginPath();
+      for(var y=-20;y<=H+20;y+=14){
+        var bend = Math.sin(y*0.006 + tt*c.sp*3 + c.ph) * c.amp * (0.35 + vel*0.5);
+        if(y===-20) cx.moveTo(c.x+bend,y); else cx.lineTo(c.x+bend,y);
+      }
+      cx.strokeStyle=THREADC; cx.lineWidth=c.w; cx.stroke();
+    });
+    requestAnimationFrame(drawThreads);
+  }
+  if(!RM){ drawThreads(); } else { cv.remove(); }
+
+  /* ---------- vertical integration stepper ---------- */
+  var steps=[].slice.call(document.querySelectorAll('.step')),
+      lyr=[].slice.call(document.querySelectorAll('.stage .lyr')),
+      rail=document.getElementById('railfill'),
+      capName=document.getElementById('capname'), capNo=document.getElementById('capno'),
+      names=['Sizing','Warping','Weaving','Processing','Stitching'], active=-1;
+  function railUpdate(){
+    if(!steps.length) return;
+    var box=document.getElementById('steps').getBoundingClientRect();
+    if(box.top>innerHeight) return;
+    var k=clamp((innerHeight*0.55-box.top)/box.height,0,1);
+    rail.style.transform='scaleY('+k+')';
+    var idx = k>=1 ? steps.length-1 : clamp(Math.floor(k*steps.length-0.001),0,steps.length-1);
+    if(idx!==active || k>=1){
+      active=idx;
+      steps.forEach(function(s,i){ s.classList.toggle('on', k>0 && i<=idx); });
+      lyr.forEach(function(l,i){ l.classList.toggle('on', i===idx); });
+      capName.textContent=names[idx];
+      capNo.textContent='0'+(idx+1)+' / 05';
+    }
+  }
+
+  /* ---------- pinned horizontal collections ---------- */
+  var pin=document.getElementById('pin'), row=document.getElementById('row');
+  function pinUpdate(){
+    if(!pin || innerWidth<=820){ row.style.transform=''; return; }
+    var r=pin.getBoundingClientRect(), vh=innerHeight;
+    var k=clamp((0-r.top)/(r.height-vh),0,1);
+    var dist=Math.max(0,row.scrollWidth-document.documentElement.clientWidth);
+    row.style.transform='translate3d('+(-k*dist)+'px,0,0)';
+  }
+
+  /* ---------- parallax ---------- */
+  var pxs=[].slice.call(document.querySelectorAll('[data-parallax]'));
+  function parallax(){
+    pxs.forEach(function(el){
+      var r=el.parentElement.getBoundingClientRect();
+      if(r.bottom<-200||r.top>innerHeight+200) return;
+      var k=(r.top+r.height/2-innerHeight/2)/innerHeight;
+      el.style.transform='translate3d(0,'+(k*-(+el.dataset.parallax||60))+'px,0)';
+    });
+    requestAnimationFrame(parallax);
+  }
+  if(!RM){ parallax(); }
+
+  /* ---------- mobile nav ---------- */
+  var burger=document.getElementById('burger'), nav=document.getElementById('nav');
+  burger.addEventListener('click',function(){
+    var o=nav.classList.toggle('open');
+    burger.classList.toggle('x',o); burger.setAttribute('aria-expanded',o);
+  });
+  nav.addEventListener('click',function(e){
+    if(e.target.tagName==='A'){ nav.classList.remove('open'); burger.classList.remove('x'); }
+  });
+
+  /* ---------- email wordmark: letters pulled like cloth on hover ---------- */
+  var mail=document.getElementById('mail'), addr='info@magnaprocessing.com';
+  var u=mail.querySelector('.u');
+  mail.textContent='';
+  addr.split('').forEach(function(c,i){
+    var s=document.createElement('i'); s.textContent=c; s.style.setProperty('--i',i); mail.appendChild(s);
+  });
+  mail.appendChild(u);
+
+  /* ---------- resize hooks ---------- */
+  addEventListener('resize', measureBands, {passive:true});
+  document.getElementById('yr').textContent=new Date().getFullYear();
+  onScroll();
+})();
+</script>
+</body>
+</html>
